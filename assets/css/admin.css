@@ -1,0 +1,21 @@
+.wpmr-pfv-settings .description{ color:#666; }
+
+ /* Email Template Preview styles */
+ .wpmr-pfv-email-preview {
+   margin-top: 24px;
+ }
+ .wpmr-pfv-email-preview__box{
+   background: #fff;
+   border: 1px solid #ccd0d4;
+   border-radius: 4px;
+   padding: 16px;
+   box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+ }
+ .wpmr-pfv-email-preview__subject{
+   margin: 0 0 10px 0;
+   font-size: 14px;
+ }
+ .wpmr-pfv-email-preview__body{
+   font-size: 13px;
+   line-height: 1.6;
+ }

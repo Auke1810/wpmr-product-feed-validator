@@ -1,0 +1,168 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: wpmr-product-feed-validator 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-15 19:55+0000\n"
+"PO-Revision-Date: 2025-09-15 19:55+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Cascade\n"
+
+#: includes/Admin/Settings.php
+msgid "Product Feed Validator"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Feed Validator"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "General"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Delivery Mode"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Require Consent (anonymous users)"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Attach CSV to Email"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Rate Limit per IP/day"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Rate Limit per Email/day"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Blocklist (one per line)"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Enable Sampling by Default"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Sample Size"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Max File Size (MB)"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Timeout (seconds)"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Redirect Cap"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Enable Shareable Reports"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Report TTL (days, 0=indefinite)"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "CAPTCHA Provider"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "CAPTCHA Site Key"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "CAPTCHA Secret Key"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Webhook URL (optional)"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Email Subject Template"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Email Body Template"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Email only"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Email + on-page display"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Email Template Preview"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Live preview using sample values. Update the fields above to customize subject and body."
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "None"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "reCAPTCHA"
+msgstr ""
+
+#: includes/Admin/Settings.php
+msgid "Cloudflare Turnstile"
+msgstr ""
+
+#: includes/Public/Shortcode.php
+msgid "Feed URL"
+msgstr ""
+
+#: includes/Public/Shortcode.php
+msgid "Email"
+msgstr ""
+
+#: includes/Public/Shortcode.php
+msgid "I consent to receive the validation report via email."
+msgstr ""
+
+#: includes/Public/Shortcode.php
+msgid "Validate Feed"
+msgstr ""
+
+#: includes/Public/Shortcode.php assets/js/public.js
+msgid "Validating…"
+msgstr ""
+
+#: includes/Public/Shortcode.php assets/js/public.js
+msgid "Request accepted. Check your email for the report."
+msgstr ""
+
+#: includes/Public/Shortcode.php assets/js/public.js
+msgid "There was an error. Please try again."
+msgstr ""
+
+#: includes/REST/Validate_Controller.php
+msgid "Feed URL is required."
+msgstr ""
+
+#: includes/REST/Validate_Controller.php
+msgid "A valid email is required."
+msgstr ""
+
+#: includes/REST/Validate_Controller.php
+msgid "Consent is required."
+msgstr ""

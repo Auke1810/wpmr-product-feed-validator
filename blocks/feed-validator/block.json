@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "wpmr/feed-validator",
+  "title": "Feed Validator",
+  "category": "widgets",
+  "icon": "feedback",
+  "description": "Public feed validator form.",
+  "textdomain": "wpmr-product-feed-validator",
+  "attributes": {
+    "sample": { "type": "boolean", "default": true }
+  },
+  "supports": { "html": false },
+  "render": "file:./render.php"
+}

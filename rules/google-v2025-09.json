@@ -1,0 +1,48 @@
+{
+  "id": "google-v2025-09",
+  "weights": { "error": 7, "warning": 3, "advice": 1, "cap_per_category": 20 },
+  "rules": [
+    {"code":"http_status","category":"transport","default_severity":"error","message":"HTTP status not 200","docs_url":"https://support.google.com/merchants/answer/7052112","can_override":true},
+    {"code":"empty_body","category":"transport","default_severity":"error","message":"Response body is empty.","docs_url":"https://support.google.com/merchants/answer/7052112","can_override":true},
+    {"code":"content_type","category":"transport","default_severity":"error","message":"Content-Type not XML and no XML declaration found.","docs_url":"https://support.google.com/merchants/answer/7052112","can_override":true},
+    {"code":"content_type_warning","category":"transport","default_severity":"warning","message":"Content-Type header does not indicate XML.","docs_url":"https://support.google.com/merchants/answer/7052112","can_override":true},
+
+    {"code":"no_items","category":"structure","default_severity":"error","message":"Neither RSS <item> nor Atom <entry> elements were found.","docs_url":"https://support.google.com/merchants/answer/7052112","can_override":true},
+    {"code":"duplicate_id","category":"structure","default_severity":"error","message":"Duplicate g:id value.","docs_url":"https://support.google.com/merchants/answer/6324473","can_override":true},
+
+    {"code":"missing_id","category":"required_attributes","default_severity":"error","message":"Missing g:id","docs_url":"https://support.google.com/merchants/answer/6324482","can_override":true},
+    {"code":"missing_title","category":"required_attributes","default_severity":"error","message":"Missing g:title","docs_url":"https://support.google.com/merchants/answer/6324415","can_override":true},
+    {"code":"missing_description","category":"required_attributes","default_severity":"error","message":"Missing g:description","docs_url":"https://support.google.com/merchants/answer/6324468","can_override":true},
+    {"code":"missing_link","category":"required_attributes","default_severity":"error","message":"Missing g:link","docs_url":"https://support.google.com/merchants/answer/6324416","can_override":true},
+    {"code":"missing_image_link","category":"required_attributes","default_severity":"error","message":"Missing g:image_link","docs_url":"https://support.google.com/merchants/answer/6324370","can_override":true},
+    {"code":"invalid_availability","category":"required_attributes","default_severity":"error","message":"Missing or invalid g:availability","docs_url":"https://support.google.com/merchants/answer/6324448","can_override":true},
+    {"code":"invalid_price","category":"required_attributes","default_severity":"error","message":"Missing or invalid g:price","docs_url":"https://support.google.com/merchants/answer/6324371","can_override":true},
+    {"code":"missing_condition","category":"required_attributes","default_severity":"warning","message":"Missing g:condition","docs_url":"https://support.google.com/merchants/answer/6324469","can_override":true},
+
+    {"code":"identifiers_all_missing","category":"identifiers","default_severity":"error","message":"Missing all of: g:gtin, g:brand, g:mpn","docs_url":"https://support.google.com/merchants/answer/6324461","can_override":true},
+    {"code":"gtin_invalid","category":"identifiers","default_severity":"warning","message":"GTIN present but fails length/numeric check.","docs_url":"https://support.google.com/merchants/answer/6219078","can_override":true},
+
+    {"code":"sale_price_gte_price","category":"price","default_severity":"error","message":"g:sale_price must be less than g:price","docs_url":"https://support.google.com/merchants/answer/6324461","can_override":true},
+
+    {"code":"link_not_absolute","category":"urls","default_severity":"error","message":"g:link must be absolute http(s)","docs_url":"https://support.google.com/merchants/answer/6324416","can_override":true},
+    {"code":"image_link_not_https","category":"urls","default_severity":"warning","message":"g:image_link should be https","docs_url":"https://support.google.com/merchants/answer/6324370","can_override":true},
+
+    {"code":"title_too_long","category":"text","default_severity":"warning","message":"Title length > 150 chars","docs_url":"https://support.google.com/merchants/answer/6324415","can_override":true},
+    {"code":"description_too_short","category":"text","default_severity":"advice","message":"Description too short (< 100 chars)","docs_url":"https://support.google.com/merchants/answer/6324468","can_override":true},
+
+    {"code":"shipping_missing_price","category":"shipping","default_severity":"warning","message":"Shipping node missing price.","docs_url":"https://support.google.com/merchants/answer/6324504","can_override":true},
+    {"code":"shipping_price_invalid","category":"shipping","default_severity":"warning","message":"Shipping price must be like '9.99 USD'.","docs_url":"https://support.google.com/merchants/answer/6324504","can_override":true},
+    {"code":"shipping_country_missing","category":"shipping","default_severity":"advice","message":"Shipping region provided without country.","docs_url":"https://support.google.com/merchants/answer/6324504","can_override":true},
+
+    {"code":"tax_missing_rate","category":"tax","default_severity":"warning","message":"Tax node missing rate.","docs_url":"https://support.google.com/merchants/answer/6324464","can_override":true},
+    {"code":"tax_rate_invalid","category":"tax","default_severity":"warning","message":"Tax rate must be 0..100 (percentage).","docs_url":"https://support.google.com/merchants/answer/6324464","can_override":true},
+    {"code":"tax_country_missing","category":"tax","default_severity":"advice","message":"Tax node missing country.","docs_url":"https://support.google.com/merchants/answer/6324464","can_override":true},
+
+    {"code":"missing_google_category","category":"category","default_severity":"warning","message":"Missing g:google_product_category","docs_url":"https://support.google.com/merchants/answer/6324436","can_override":true},
+    {"code":"missing_product_type","category":"category","default_severity":"advice","message":"Missing g:product_type","docs_url":"https://support.google.com/merchants/answer/6324406","can_override":true},
+
+    {"code":"variants_missing_group","category":"variants","default_severity":"error","message":"Variants detected without g:item_group_id","docs_url":"https://support.google.com/merchants/answer/6324507","can_override":true},
+
+    {"code":"adult_without_flag","category":"policy","default_severity":"warning","message":"Possible adult content without g:adult flag","docs_url":"https://support.google.com/merchants/answer/6324508","can_override":true}
+  ]
+}
