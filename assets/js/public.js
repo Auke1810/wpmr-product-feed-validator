@@ -395,6 +395,10 @@
     else if (turnstileInput && turnstileInput.value) captchaToken = turnstileInput.value;
     var result = form.querySelector('.wpmr-pfv-result');
 
+    // Set loading state with accessibility enhancements
+    if (typeof setLoadingState === 'function') {
+      setLoadingState(form);
+    }
     result.textContent = WPMR_PFV_I18N.validating;
 
     fetch(endpoint, {
@@ -408,6 +412,11 @@
     })
     .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
     .then(function(r){
+      // Reset loading state
+      if (typeof resetLoadingState === 'function') {
+        resetLoadingState(form);
+      }
+
       if(r.ok){
         // Show message first
         result.textContent = (r.data && r.data.message) ? r.data.message : WPMR_PFV_I18N.success;
@@ -419,15 +428,58 @@
           renderReport(wrap, r.data);
           // Accessibility: move focus to results
           try { wrap.focus({ preventScroll: false }); } catch(e) { try { wrap.focus(); } catch(_){} }
+          // Announce to screen readers
+          if (typeof announceToScreenReader === 'function') {
+            announceToScreenReader('Validation report generated successfully.', 'assertive');
+          }
         }
         // Remember last submission for Resend
         window.__WPMR_LAST_REQ__ = { endpoint: endpoint, url: url, email: email, consent: consent, sample: sample };
       } else {
         var msg = (r.data && (r.data.message || (r.data.code+': '+(r.data.data && r.data.data.status)))) || WPMR_PFV_I18N.error;
+        
+        // Handle specific error codes
+        if (r.data && r.data.code) {
+          switch (r.data.code) {
+            case 'wpmr_pfv_rate_limited_ip':
+              msg = 'You have exceeded the daily request limit for this IP address. Please try again tomorrow.';
+              break;
+            case 'wpmr_pfv_rate_limited_email':
+              msg = 'You have exceeded the daily request limit for this email address. Please try again tomorrow.';
+              break;
+            case 'wpmr_pfv_blocked':
+              msg = 'Requests from this email address or IP are not allowed. Please contact support if this seems incorrect.';
+              break;
+            case 'wpmr_pfv_missing_url':
+              msg = 'Please provide a valid feed URL.';
+              break;
+            case 'wpmr_pfv_invalid_email':
+              msg = 'Please provide a valid email address.';
+              break;
+            case 'wpmr_pfv_missing_consent':
+              msg = 'You must consent to receive the validation report.';
+              break;
+          }
+        }
+        
         result.textContent = msg;
+        // Announce error to screen readers
+        if (typeof announceToScreenReader === 'function') {
+          announceToScreenReader('Validation failed: ' + msg, 'assertive');
+        }
       }
     })
-    .catch(function(){ result.textContent = WPMR_PFV_I18N.error; });
+    .catch(function(err){
+      // Reset loading state on error
+      if (typeof resetLoadingState === 'function') {
+        resetLoadingState(form);
+      }
+      result.textContent = WPMR_PFV_I18N.error;
+      // Announce error to screen readers
+      if (typeof announceToScreenReader === 'function') {
+        announceToScreenReader('Network error occurred. Please try again.', 'assertive');
+      }
+    });
   }
 
   document.addEventListener('submit', function(e){

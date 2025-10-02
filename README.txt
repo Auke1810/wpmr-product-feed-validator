@@ -68,7 +68,3 @@ Initial release. No upgrade required.
 - `POST /wp-json/wpmr/v1/validate` - Validate single product
 - `GET /wp-json/wpmr/v1/full-scan` - Full feed validation
 - `GET|POST /wp-json/wpmr/v1/rules` - List or modify validation rules
-
-== Additional Notes ==
-
-For developers: See included `CONTRIBUTING.md` for coding standards and pull request guidelines.

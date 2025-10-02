@@ -1,4 +1,23 @@
-/* Public UI styles for Results (Milestone 5) */
+/* Form styling */
+.wpmr-pfv-form { max-width: 600px; }
+.wpmr-pfv-field-group { margin-bottom: 16px; }
+.wpmr-pfv-label { display: block; margin-bottom: 4px; font-weight: 600; }
+.wpmr-pfv-label .required { color: #b20000; }
+.wpmr-pfv-submit-group { margin-top: 20px; }
+.wpmr-pfv-submit-button { background: #24c261; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+.wpmr-pfv-submit-button:hover, .wpmr-pfv-submit-button:focus { background: #1ea956; }
+.wpmr-pfv-submit-button:disabled { background: #ccc; cursor: not-allowed; }
+
+/* Error messages */
+.wpmr-pfv-error { background: #ffeaea; border: 1px solid #f5c6cb; color: #721c24; padding: 8px 12px; border-radius: 4px; margin-top: 8px; font-size: 14px; }
+.wpmr-pfv-result { margin-top: 16px; padding: 12px; border-radius: 4px; }
+.wpmr-pfv-result:empty { display: none; }
+
+/* Screen reader only text */
+.screen-reader-text { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+/* Focus styles for accessibility */
+.wpmr-pfv-form input:focus, .wpmr-pfv-form button:focus { outline: 2px solid #24c261; outline-offset: 2px; }
 .wpmr-pfv-title { margin: 0 0 8px; font-size: 20px; }
 .wpmr-pfv-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin: 8px 0 12px; }
 .wpmr-pfv-score-badge { display: inline-block; font-weight: 700; padding: 6px 10px; border-radius: 999px; color: #fff; }
