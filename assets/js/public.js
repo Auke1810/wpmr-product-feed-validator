@@ -8,6 +8,136 @@
     return e;
   }
 
+  // "How to Fix" configuration for error codes
+  var HOW_TO_FIX = {
+    'missing_xml_declaration': 'Add <?xml version="1.0" encoding="UTF-8"?> at the start of your XML file.',
+    'invalid_xml_version': 'Change the XML version to "1.0" or "1.1" in your declaration.',
+    'encoding_mismatch': 'Ensure your file encoding matches the declared encoding in the XML declaration.',
+    'missing_google_namespace': 'Add xmlns:g="http://base.google.com/ns/1.0" to your root <rss> or <feed> element.',
+    'invalid_root_element': 'Use <rss> for RSS feeds or <feed> for Atom feeds as the root element.',
+    'bom_detected': 'Remove the BOM (Byte Order Mark) from your XML file or ensure it matches your declared encoding.',
+    'missing_encoding': 'Add encoding="UTF-8" to your XML declaration.',
+    'uncommon_encoding': 'Consider using UTF-8 encoding for better compatibility.',
+    'required_price': 'Add a <g:price> element with the product price (e.g., <g:price>19.99 USD</g:price>).',
+    'required_title': 'Add a <g:title> element with the product name.',
+    'required_description': 'Add a <g:description> element with the product description.',
+    'required_link': 'Add a <g:link> element with the product URL.',
+    'required_image_link': 'Add a <g:image_link> element with the product image URL.',
+    'duplicate_id': 'Ensure each product has a unique <g:id> value. Check for duplicates in your feed.',
+    'missing_id': 'Add a <g:id> element to each product with a unique identifier.'
+  };
+
+  /**
+   * Transform REST API response to display-friendly format
+   * @param {Object} apiResponse - Response from /wpmr/v1/validate endpoint
+   * @returns {Object} Transformed data for display
+   */
+  function transformValidationData(apiResponse) {
+    var report = apiResponse && apiResponse.report;
+    if (!report) return null;
+
+    var diagnostics = Array.isArray(report.diagnostics) ? report.diagnostics : [];
+    var issues = Array.isArray(report.issues) ? report.issues : [];
+    var totals = report.totals || {};
+    var itemsScanned = report.items_scanned || 0;
+
+    // Calculate statistics
+    var errorCount = totals.errors || 0;
+    var warningCount = totals.warnings || 0;
+    var validProducts = Math.max(0, itemsScanned - errorCount);
+
+    // Determine overall status
+    var status = 'success';
+    var summary = 'Feed validated successfully!';
+    if (errorCount > 0) {
+      status = 'error';
+      summary = 'Feed has ' + errorCount + ' critical error' + (errorCount !== 1 ? 's' : '') + ' that must be fixed.';
+    } else if (warningCount > 0) {
+      status = 'warning';
+      summary = 'Feed validated with ' + warningCount + ' warning' + (warningCount !== 1 ? 's' : '') + '.';
+    }
+
+    // Group diagnostics and issues by error code
+    var errorGroups = {};
+    var warningGroups = {};
+
+    // Process diagnostics (feed-level issues)
+    diagnostics.forEach(function(diag) {
+      var severity = (diag.severity || '').toLowerCase();
+      var code = diag.code || 'unknown';
+      var message = diag.message || 'No message provided';
+      
+      var group = severity === 'error' ? errorGroups : warningGroups;
+      if (!group[code]) {
+        group[code] = {
+          title: formatErrorTitle(code),
+          message: message,
+          affected_items: [],
+          affected_count: 0,
+          how_to_fix: HOW_TO_FIX[code] || 'Please review your feed configuration.',
+          code: code
+        };
+      }
+    });
+
+    // Process issues (product-level issues)
+    issues.forEach(function(issue) {
+      var severity = (issue.severity || '').toLowerCase();
+      var code = issue.code || issue.rule_id || 'unknown';
+      var itemId = issue.item_id || '';
+      var message = issue.message || 'No message provided';
+      
+      var group = severity === 'error' ? errorGroups : warningGroups;
+      if (!group[code]) {
+        group[code] = {
+          title: formatErrorTitle(code),
+          message: message,
+          affected_items: [],
+          affected_count: 0,
+          how_to_fix: HOW_TO_FIX[code] || 'Please review the affected products and fix the issue.',
+          code: code
+        };
+      }
+      
+      if (itemId && group[code].affected_items.indexOf(itemId) === -1) {
+        group[code].affected_items.push(itemId);
+      }
+      group[code].affected_count++;
+    });
+
+    // Convert groups to arrays
+    var errors = Object.keys(errorGroups).map(function(code) { return errorGroups[code]; });
+    var warnings = Object.keys(warningGroups).map(function(code) { return warningGroups[code]; });
+
+    return {
+      status: status,
+      summary: summary,
+      total_products: itemsScanned,
+      error_count: errorCount,
+      warning_count: warningCount,
+      valid_products: validProducts,
+      errors: errors,
+      warnings: warnings,
+      score: report.score,
+      duplicates: report.duplicates || [],
+      missing_id_count: report.missing_id_count || 0
+    };
+  }
+
+  /**
+   * Format error code into human-readable title
+   * @param {string} code - Error code
+   * @returns {string} Formatted title
+   */
+  function formatErrorTitle(code) {
+    if (!code) return 'Unknown Issue';
+    // Convert snake_case to Title Case
+    return code
+      .split('_')
+      .map(function(word) { return word.charAt(0).toUpperCase() + word.slice(1); })
+      .join(' ');
+  }
+
   function readiness(score){
     var s = typeof score === 'number' ? score : -1;
     if(s >= 90) return { label: 'Ready', cls: 'ready', badgeBg: '#1d7a2e' };
@@ -377,6 +507,349 @@
     container.appendChild(note);
   }
 
+  /**
+   * Render new comprehensive validation results display
+   * @param {HTMLElement} container - Container element
+   * @param {Object} data - Transformed validation data
+   */
+  function renderNewValidationResults(container, data) {
+    if (!data) return;
+
+    // Clear container
+    container.innerHTML = '';
+
+    // Add inline styles
+    var style = document.createElement('style');
+    style.textContent = `
+      .wpmr-pfv-new-results { max-width: 1200px; margin: 30px auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif; }
+      .wpmr-pfv-status-banner { padding: 15px 20px; margin-bottom: 30px; border-left: 4px solid; display: flex; align-items: center; gap: 12px; }
+      .wpmr-pfv-status-banner.success { background: #d7f4d7; border-color: #46b450; color: #1e4620; }
+      .wpmr-pfv-status-banner.warning { background: #fff8e5; border-color: #f0b849; color: #614200; }
+      .wpmr-pfv-status-banner.error { background: #fce4e4; border-color: #dc3232; color: #5b1515; }
+      .wpmr-pfv-status-icon { font-size: 24px; line-height: 1; }
+      .wpmr-pfv-status-message { flex: 1; font-size: 16px; font-weight: 500; }
+      .wpmr-pfv-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+      .wpmr-pfv-stat-card { background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+      .wpmr-pfv-stat-number { font-size: 32px; font-weight: bold; color: #2271b1; margin-bottom: 8px; }
+      .wpmr-pfv-stat-label { font-size: 14px; color: #646970; }
+      .wpmr-pfv-section { background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+      .wpmr-pfv-section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid; }
+      .wpmr-pfv-section-header.error { border-color: #dc3232; color: #dc3232; }
+      .wpmr-pfv-section-header.warning { border-color: #f0b849; color: #946200; }
+      .wpmr-pfv-section-header.info { border-color: #2271b1; color: #2271b1; }
+      .wpmr-pfv-section-title { font-size: 20px; font-weight: bold; margin: 0; }
+      .wpmr-pfv-issue-item { margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #dcdcde; }
+      .wpmr-pfv-issue-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+      .wpmr-pfv-issue-title { font-size: 16px; font-weight: bold; margin: 0 0 8px 0; }
+      .wpmr-pfv-issue-message { font-size: 14px; color: #646970; margin-bottom: 12px; }
+      .wpmr-pfv-affected-products { margin: 12px 0; }
+      .wpmr-pfv-affected-products summary { cursor: pointer; font-size: 14px; font-weight: 500; color: #2271b1; padding: 8px 0; }
+      .wpmr-pfv-affected-products summary:hover { text-decoration: underline; }
+      .wpmr-pfv-product-list { list-style: none; padding: 10px 0 0 0; margin: 0; }
+      .wpmr-pfv-product-list li { padding: 6px 0; font-size: 13px; }
+      .wpmr-pfv-product-list code { background: #f6f7f7; padding: 2px 6px; border-radius: 3px; font-family: Consolas, Monaco, 'Courier New', monospace; font-size: 12px; }
+      .wpmr-pfv-how-to-fix { background: #e5f5fa; border-left: 3px solid #2271b1; padding: 12px 15px; margin-top: 12px; border-radius: 3px; }
+      .wpmr-pfv-how-to-fix-title { font-size: 13px; font-weight: bold; color: #2271b1; margin: 0 0 6px 0; }
+      .wpmr-pfv-how-to-fix-text { font-size: 13px; color: #1d2327; margin: 0; }
+      .wpmr-pfv-tip-item { display: flex; gap: 15px; padding: 15px; background: #f6f7f7; border-radius: 4px; margin-bottom: 12px; }
+      .wpmr-pfv-tip-item:last-child { margin-bottom: 0; }
+      .wpmr-pfv-tip-icon { font-size: 20px; color: #2271b1; flex-shrink: 0; }
+      .wpmr-pfv-tip-content { flex: 1; }
+      .wpmr-pfv-tip-title { font-size: 14px; font-weight: 600; margin: 0 0 4px 0; }
+      .wpmr-pfv-tip-description { font-size: 13px; color: #646970; margin: 0; }
+      .wpmr-pfv-impact-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-left: 8px; }
+      .wpmr-pfv-impact-badge.high { background: #dc3232; color: #fff; }
+      .wpmr-pfv-impact-badge.medium { background: #f0b849; color: #614200; }
+      .wpmr-pfv-impact-badge.low { background: #dcdcde; color: #646970; }
+      .wpmr-pfv-export-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+      .wpmr-pfv-export-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #2271b1; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; text-decoration: none; }
+      .wpmr-pfv-export-btn:hover { background: #135e96; }
+      .wpmr-pfv-export-btn:disabled { background: #dcdcde; color: #a7aaad; cursor: not-allowed; }
+      @media (max-width: 768px) {
+        .wpmr-pfv-stats-grid { grid-template-columns: 1fr; }
+        .wpmr-pfv-stat-number { font-size: 28px; }
+        .wpmr-pfv-section { padding: 15px; }
+      }
+    `;
+    container.appendChild(style);
+
+    // Create wrapper
+    var wrapper = el('div', 'wpmr-pfv-new-results');
+    
+    // 1. Status Banner
+    wrapper.appendChild(renderStatusBanner(data.status, data.summary));
+    
+    // 2. Statistics Dashboard
+    wrapper.appendChild(renderStatsDashboard(data));
+    
+    // 3. Errors Section (if errors exist)
+    if (data.errors && data.errors.length > 0) {
+      wrapper.appendChild(renderErrorsSection(data.errors));
+    }
+    
+    // 4. Warnings Section (if warnings exist)
+    if (data.warnings && data.warnings.length > 0) {
+      wrapper.appendChild(renderWarningsSection(data.warnings));
+    }
+    
+    // 5. Improvement Tips (always shown)
+    wrapper.appendChild(renderImprovementTips());
+    
+    // 6. Export Section
+    wrapper.appendChild(renderExportSection());
+    
+    container.appendChild(wrapper);
+  }
+
+  /**
+   * Render status banner
+   */
+  function renderStatusBanner(status, summary) {
+    var banner = el('div', 'wpmr-pfv-status-banner ' + status);
+    var icon = el('span', 'wpmr-pfv-status-icon');
+    icon.innerHTML = status === 'success' ? '✓' : (status === 'warning' ? '⚠' : '✕');
+    var message = el('div', 'wpmr-pfv-status-message', summary);
+    banner.appendChild(icon);
+    banner.appendChild(message);
+    return banner;
+  }
+
+  /**
+   * Render statistics dashboard
+   */
+  function renderStatsDashboard(data) {
+    var grid = el('div', 'wpmr-pfv-stats-grid');
+    
+    var stats = [
+      { label: 'Total Products', value: data.total_products },
+      { label: 'Errors', value: data.error_count },
+      { label: 'Warnings', value: data.warning_count },
+      { label: 'Valid Products', value: data.valid_products }
+    ];
+    
+    stats.forEach(function(stat) {
+      var card = el('div', 'wpmr-pfv-stat-card');
+      var number = el('div', 'wpmr-pfv-stat-number', stat.value.toLocaleString());
+      var label = el('div', 'wpmr-pfv-stat-label', stat.label);
+      card.appendChild(number);
+      card.appendChild(label);
+      grid.appendChild(card);
+    });
+    
+    return grid;
+  }
+
+  /**
+   * Render errors section
+   */
+  function renderErrorsSection(errors) {
+    var section = el('div', 'wpmr-pfv-section');
+    var header = el('div', 'wpmr-pfv-section-header error');
+    var icon = el('span', '');
+    icon.innerHTML = '✕';
+    var title = el('h2', 'wpmr-pfv-section-title', 'Critical Errors');
+    header.appendChild(icon);
+    header.appendChild(title);
+    section.appendChild(header);
+    
+    errors.forEach(function(error) {
+      var item = el('div', 'wpmr-pfv-issue-item');
+      var itemTitle = el('h3', 'wpmr-pfv-issue-title', error.title);
+      var itemMessage = el('p', 'wpmr-pfv-issue-message', error.message);
+      item.appendChild(itemTitle);
+      item.appendChild(itemMessage);
+      
+      // Affected products
+      if (error.affected_items && error.affected_items.length > 0) {
+        var details = document.createElement('details');
+        details.className = 'wpmr-pfv-affected-products';
+        var summary = document.createElement('summary');
+        var count = error.affected_count || error.affected_items.length;
+        summary.textContent = 'Affected products (' + count + ')';
+        details.appendChild(summary);
+        
+        var list = el('ul', 'wpmr-pfv-product-list');
+        var maxShow = 5;
+        error.affected_items.slice(0, maxShow).forEach(function(itemId) {
+          var li = el('li');
+          var code = document.createElement('code');
+          code.textContent = itemId;
+          li.appendChild(code);
+          list.appendChild(li);
+        });
+        
+        if (error.affected_items.length > maxShow) {
+          var more = el('li', '', '... and ' + (error.affected_items.length - maxShow) + ' more');
+          list.appendChild(more);
+        }
+        
+        details.appendChild(list);
+        item.appendChild(details);
+      }
+      
+      // How to fix
+      if (error.how_to_fix) {
+        var fixBox = el('div', 'wpmr-pfv-how-to-fix');
+        var fixTitle = el('div', 'wpmr-pfv-how-to-fix-title', '💡 How to fix');
+        var fixText = el('p', 'wpmr-pfv-how-to-fix-text', error.how_to_fix);
+        fixBox.appendChild(fixTitle);
+        fixBox.appendChild(fixText);
+        item.appendChild(fixBox);
+      }
+      
+      section.appendChild(item);
+    });
+    
+    return section;
+  }
+
+  /**
+   * Render warnings section
+   */
+  function renderWarningsSection(warnings) {
+    var section = el('div', 'wpmr-pfv-section');
+    var header = el('div', 'wpmr-pfv-section-header warning');
+    var icon = el('span', '');
+    icon.innerHTML = '⚠';
+    var title = el('h2', 'wpmr-pfv-section-title', 'Warnings');
+    header.appendChild(icon);
+    header.appendChild(title);
+    section.appendChild(header);
+    
+    warnings.forEach(function(warning) {
+      var item = el('div', 'wpmr-pfv-issue-item');
+      var itemTitle = el('h3', 'wpmr-pfv-issue-title', warning.title);
+      var itemMessage = el('p', 'wpmr-pfv-issue-message', warning.message);
+      item.appendChild(itemTitle);
+      item.appendChild(itemMessage);
+      
+      // Affected products
+      if (warning.affected_items && warning.affected_items.length > 0) {
+        var details = document.createElement('details');
+        details.className = 'wpmr-pfv-affected-products';
+        var summary = document.createElement('summary');
+        var count = warning.affected_count || warning.affected_items.length;
+        summary.textContent = 'Affected products (' + count + ')';
+        details.appendChild(summary);
+        
+        var list = el('ul', 'wpmr-pfv-product-list');
+        var maxShow = 5;
+        warning.affected_items.slice(0, maxShow).forEach(function(itemId) {
+          var li = el('li');
+          var code = document.createElement('code');
+          code.textContent = itemId;
+          li.appendChild(code);
+          list.appendChild(li);
+        });
+        
+        if (warning.affected_items.length > maxShow) {
+          var more = el('li', '', '... and ' + (warning.affected_items.length - maxShow) + ' more');
+          list.appendChild(more);
+        }
+        
+        details.appendChild(list);
+        item.appendChild(details);
+      }
+      
+      section.appendChild(item);
+    });
+    
+    return section;
+  }
+
+  /**
+   * Render improvement tips section
+   */
+  function renderImprovementTips() {
+    var section = el('div', 'wpmr-pfv-section');
+    var header = el('div', 'wpmr-pfv-section-header info');
+    var icon = el('span', '');
+    icon.innerHTML = '💡';
+    var title = el('h2', 'wpmr-pfv-section-title', 'Improvement Tips');
+    header.appendChild(icon);
+    header.appendChild(title);
+    section.appendChild(header);
+    
+    var tips = [
+      {
+        title: 'Add High-Quality Images',
+        description: 'Use images with at least 800x800 pixels for better visibility in Shopping ads.',
+        impact: 'high'
+      },
+      {
+        title: 'Include GTIN/MPN Numbers',
+        description: 'Products with GTINs or MPNs get higher priority and better matching.',
+        impact: 'high'
+      },
+      {
+        title: 'Optimize Product Titles',
+        description: 'Include brand, product type, and key attributes in the first 70 characters.',
+        impact: 'medium'
+      },
+      {
+        title: 'Add Product Ratings',
+        description: 'Include product ratings and review counts to increase click-through rates.',
+        impact: 'medium'
+      },
+      {
+        title: 'Use Custom Labels',
+        description: 'Leverage custom_label attributes for better campaign segmentation.',
+        impact: 'low'
+      }
+    ];
+    
+    tips.forEach(function(tip) {
+      var item = el('div', 'wpmr-pfv-tip-item');
+      var tipIcon = el('div', 'wpmr-pfv-tip-icon', '💡');
+      var content = el('div', 'wpmr-pfv-tip-content');
+      var tipTitle = el('div', 'wpmr-pfv-tip-title');
+      tipTitle.textContent = tip.title;
+      var badge = el('span', 'wpmr-pfv-impact-badge ' + tip.impact, tip.impact);
+      tipTitle.appendChild(badge);
+      var tipDesc = el('p', 'wpmr-pfv-tip-description', tip.description);
+      content.appendChild(tipTitle);
+      content.appendChild(tipDesc);
+      item.appendChild(tipIcon);
+      item.appendChild(content);
+      section.appendChild(item);
+    });
+    
+    return section;
+  }
+
+  /**
+   * Render export section
+   */
+  function renderExportSection() {
+    var section = el('div', 'wpmr-pfv-section');
+    var header = el('div', 'wpmr-pfv-section-header info');
+    var icon = el('span', '');
+    icon.innerHTML = '⬇';
+    var title = el('h2', 'wpmr-pfv-section-title', 'Export Results');
+    header.appendChild(icon);
+    header.appendChild(title);
+    section.appendChild(header);
+    
+    var buttons = el('div', 'wpmr-pfv-export-buttons');
+    
+    var formats = ['PDF', 'CSV', 'JSON'];
+    formats.forEach(function(format) {
+      var btn = document.createElement('a');
+      btn.href = '#';
+      btn.className = 'wpmr-pfv-export-btn';
+      btn.textContent = '⬇ Export ' + format;
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Placeholder - will be implemented later
+        alert('Export ' + format + ' functionality coming soon!');
+      });
+      buttons.appendChild(btn);
+    });
+    
+    section.appendChild(buttons);
+    return section;
+  }
+
   function onSubmit(e){
     e.preventDefault();
     var form = e.target;
@@ -418,19 +891,48 @@
       }
 
       if(r.ok){
-        // Show message first
-        result.textContent = (r.data && r.data.message) ? r.data.message : WPMR_PFV_I18N.success;
-        // If a report is present, render it below
+        // Clear previous results
+        result.innerHTML = '';
+        
+        // Show email notification message
+        var emailMsg = el('div', 'wpmr-pfv-email-notice');
+        emailMsg.textContent = (r.data && r.data.message) ? r.data.message : WPMR_PFV_I18N.success;
+        emailMsg.style.cssText = 'padding: 12px 15px; background: #d7f4d7; border-left: 4px solid #46b450; color: #1e4620; margin-bottom: 20px; border-radius: 3px;';
+        result.appendChild(emailMsg);
+        
+        // If a report is present, render new comprehensive display
         if(r.data && r.data.report){
-          var wrap = el('div', 'wpmr-pfv-report');
-          wrap.setAttribute('tabindex','-1');
-          result.appendChild(wrap);
-          renderReport(wrap, r.data);
-          // Accessibility: move focus to results
-          try { wrap.focus({ preventScroll: false }); } catch(e) { try { wrap.focus(); } catch(_){} }
-          // Announce to screen readers
-          if (typeof announceToScreenReader === 'function') {
-            announceToScreenReader('Validation report generated successfully.', 'assertive');
+          // Transform API response to display format
+          var transformedData = transformValidationData(r.data);
+          
+          if (transformedData) {
+            // Render new validation results display
+            var wrap = el('div', 'wpmr-pfv-new-report-wrap');
+            wrap.setAttribute('tabindex','-1');
+            result.appendChild(wrap);
+            renderNewValidationResults(wrap, transformedData);
+            
+            // Scroll to results
+            setTimeout(function() {
+              wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+            
+            // Accessibility: move focus to results
+            try { wrap.focus({ preventScroll: false }); } catch(e) { try { wrap.focus(); } catch(_){} }
+            // Announce to screen readers
+            if (typeof announceToScreenReader === 'function') {
+              announceToScreenReader('Validation report generated successfully. ' + transformedData.summary, 'assertive');
+            }
+          } else {
+            // Fallback to old rendering if transformation fails
+            var wrap = el('div', 'wpmr-pfv-report');
+            wrap.setAttribute('tabindex','-1');
+            result.appendChild(wrap);
+            renderReport(wrap, r.data);
+            try { wrap.focus({ preventScroll: false }); } catch(e) { try { wrap.focus(); } catch(_){} }
+            if (typeof announceToScreenReader === 'function') {
+              announceToScreenReader('Validation report generated successfully.', 'assertive');
+            }
           }
         }
         // Remember last submission for Resend
