@@ -5,6 +5,86 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+#### Frontend Validation Results Display (2025-11-26)
+- **Comprehensive Results Screen**: New detailed validation results display for `[feed_validator]` shortcode
+  - Color-coded status banner (green/yellow/red) with summary message
+  - Statistics dashboard with 4 cards: Total Products, Errors, Warnings, Valid Products
+  - Critical Errors section with red theme, grouped by error code
+  - Warnings section with yellow theme, grouped by warning code
+  - "How to Fix" guidance boxes for each error type with actionable instructions
+  - Improvement Tips section (always shown) with 5 optimization suggestions and impact badges
+  - Export section with placeholder buttons for PDF, CSV, and JSON (functionality coming soon)
+- **Enhanced Data Transformation**: JavaScript layer to convert REST API response to display-friendly format
+  - Automatic grouping of errors/warnings by error code
+  - Affected products list (shows first 5, indicates if more)
+  - Product ID display with proper formatting
+  - Statistics calculation (valid products = total - errors)
+- **WordPress-Inspired Design**: Clean, modern UI matching WordPress admin aesthetics
+  - Inline CSS for self-contained styling
+  - Responsive grid layout (4 columns → 2 → 1 on mobile)
+  - Card-based sections with shadows and borders
+  - Collapsible `<details>` elements for product lists
+  - Impact badges (high=red, medium=yellow, low=gray)
+- **Accessibility Features**: Full keyboard navigation and screen reader support
+  - Focus management with smooth scroll to results
+  - ARIA announcements for validation completion
+  - Keyboard-accessible collapsible sections
+  - Proper heading hierarchy (h2, h3)
+- **Mobile Responsive**: Optimized for all screen sizes
+  - Stacked statistics cards on mobile
+  - Adjusted font sizes and padding
+  - Touch-friendly tap targets
+  - No horizontal scroll on small screens
+- **Backward Compatibility**: Maintains all existing functionality
+  - Email delivery preserved
+  - Fallback to old rendering if transformation fails
+  - No breaking changes to shortcode usage
+  - Existing AJAX flow extended, not replaced
+
+#### XML Validation Enhancements (2025-11-26)
+- **XML Declaration Validation**: Checks for proper XML declaration at file start
+  - Validates XML version (1.0 or 1.1)
+  - Validates encoding declaration
+  - Reports missing or invalid declarations
+- **File Encoding Validation**: Detects and validates file encoding
+  - BOM (Byte Order Mark) detection for UTF-8, UTF-16, UTF-32
+  - Encoding mismatch detection (declared vs actual)
+  - Support for common encodings (UTF-8, UTF-16, ISO-8859-1, Windows-1252)
+- **XML Structure Validation**: Early validation of feed structure
+  - Root element validation (must be `<rss>` or `<feed>`)
+  - Google namespace validation (xmlns:g="http://base.google.com/ns/1.0")
+  - Prevents processing of malformed feeds
+
+### Changed
+- **Results Display**: Enhanced from simple table to comprehensive diagnostic screen
+- **Error Reporting**: Errors now grouped by code with affected product counts
+- **User Experience**: More actionable feedback with "how to fix" guidance
+
+### Technical Details
+- **Files Modified**: `assets/js/public.js` (+420 lines)
+- **New Functions**: 
+  - `transformValidationData()` - Data transformer
+  - `renderNewValidationResults()` - Main orchestrator
+  - `renderStatusBanner()` - Status banner template
+  - `renderStatsDashboard()` - Statistics grid template
+  - `renderErrorsSection()` - Errors template
+  - `renderWarningsSection()` - Warnings template
+  - `renderImprovementTips()` - Tips template
+  - `renderExportSection()` - Export buttons template
+  - `formatErrorTitle()` - Error code formatter
+- **Configuration**: `HOW_TO_FIX` object with 15+ error code mappings
+- **Testing**: Comprehensive testing guide created (`ai-docs/TESTING_GUIDE_FRONTEND_VALIDATION.md`)
+
+### Documentation
+- Created `ai-docs/TESTING_GUIDE_FRONTEND_VALIDATION.md` - Complete testing procedures
+- Updated `ai-docs/tasks/002_frontend_validation_results_display.md` - Implementation documentation
+- Updated `ai-docs/tasks/001_xml_validation_enhancements.md` - XML validation documentation
+
+---
+
 ## [0.1.0] - 2025-10-02
 
 ### Added
