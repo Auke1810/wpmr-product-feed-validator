@@ -30,6 +30,12 @@ class Parser {
 
         $format = null; // rss|atom|null
         $diagnostics = [];
+
+        // Validate XML structure (root element and namespaces)
+        $structure_diags = self::validate_xml_structure( $xml );
+        if ( ! empty( $structure_diags ) ) {
+            $diagnostics = array_merge( $diagnostics, $structure_diags );
+        }
         $seen_ids = [];
         $duplicates = [];
         $items_scanned = 0;
@@ -169,5 +175,57 @@ class Parser {
             'items' => $items,
             'diagnostics' => $diagnostics,
         ];
+    }
+
+    /**
+     * Validate XML structure (root element and namespaces).
+     *
+     * @param string $xml XML content to validate
+     * @return array Diagnostics array
+     */
+    protected static function validate_xml_structure( string $xml ) {
+        $diagnostics = [];
+
+        // Use SimpleXML for structure validation (more efficient than XMLReader for this)
+        $sx = @simplexml_load_string( $xml );
+        if ( $sx === false ) {
+            // Already caught by XMLReader, but add diagnostic for clarity
+            return $diagnostics;
+        }
+
+        $root_name = $sx->getName();
+
+        // Validate root element
+        if ( ! in_array( $root_name, [ 'rss', 'feed' ], true ) ) {
+            $diagnostics[] = [
+                'severity' => 'error',
+                'code' => 'invalid_root_element',
+                'message' => sprintf(
+                    __( 'Invalid root element "<%s>". Expected <rss> or <feed>.', 'wpmr-product-feed-validator' ),
+                    esc_html( $root_name )
+                ),
+            ];
+        }
+
+        // Check for Google namespace
+        $namespaces = $sx->getNamespaces( true );
+        $has_google_namespace = false;
+
+        foreach ( $namespaces as $prefix => $uri ) {
+            if ( $prefix === 'g' || $uri === 'http://base.google.com/ns/1.0' ) {
+                $has_google_namespace = true;
+                break;
+            }
+        }
+
+        if ( ! $has_google_namespace ) {
+            $diagnostics[] = [
+                'severity' => 'warning',
+                'code' => 'missing_google_namespace',
+                'message' => __( 'Google namespace (xmlns:g="http://base.google.com/ns/1.0") not found. Required for Google Shopping feeds.', 'wpmr-product-feed-validator' ),
+            ];
+        }
+
+        return $diagnostics;
     }
 }
