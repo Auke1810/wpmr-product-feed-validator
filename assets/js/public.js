@@ -821,33 +821,10 @@
    * Render export section
    */
   function renderExportSection() {
-    var section = el('div', 'wpmr-pfv-section');
-    var header = el('div', 'wpmr-pfv-section-header info');
-    var icon = el('span', '');
-    icon.innerHTML = '⬇';
-    var title = el('h2', 'wpmr-pfv-section-title', 'Export Results');
-    header.appendChild(icon);
-    header.appendChild(title);
-    section.appendChild(header);
-    
-    var buttons = el('div', 'wpmr-pfv-export-buttons');
-    
-    var formats = ['PDF', 'CSV', 'JSON'];
-    formats.forEach(function(format) {
-      var btn = document.createElement('a');
-      btn.href = '#';
-      btn.className = 'wpmr-pfv-export-btn';
-      btn.textContent = '⬇ Export ' + format;
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        // Placeholder - will be implemented later
-        alert('Export ' + format + ' functionality coming soon!');
-      });
-      buttons.appendChild(btn);
-    });
-    
-    section.appendChild(buttons);
-    return section;
+    var banner = el('div', 'wpmr-pfv-status-banner success');
+    var message = el('div', 'wpmr-pfv-status-message', 'Check your email for the attached CSV file containing the validation report');
+    banner.appendChild(message);
+    return banner;
   }
 
   function onSubmit(e){

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+#### Export Results Section Simplification (2025-11-26)
+- **Simplified Export Section**: Replaced placeholder export buttons (PDF, CSV, JSON) with clear email notice
+  - Message: "Check your email for the attached CSV file containing the validation report"
+  - Green success banner styling (matches WordPress success notices)
+  - No icon, clean and simple design
+  - Always displayed after validation completes
+- **Code Optimization**: Reduced renderExportSection() function from 28 lines to 5 lines (82% smaller)
+- **Performance Improvements**: 75% fewer DOM elements (8 → 2), 100% fewer event listeners (3 → 0)
+- **User Experience**: Removed confusing placeholder buttons, provided clear actionable guidance to check email
+
 ### Added
 #### Frontend Validation Results Display (2025-11-26)
 - **Comprehensive Results Screen**: New detailed validation results display for `[feed_validator]` shortcode
@@ -16,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Warnings section with yellow theme, grouped by warning code
   - "How to Fix" guidance boxes for each error type with actionable instructions
   - Improvement Tips section (always shown) with 5 optimization suggestions and impact badges
-  - Export section with placeholder buttons for PDF, CSV, and JSON (functionality coming soon)
+  - Export section with email notice (updated 2025-11-26 to simple green banner)
 - **Enhanced Data Transformation**: JavaScript layer to convert REST API response to display-friendly format
   - Automatic grouping of errors/warnings by error code
   - Affected products list (shows first 5, indicates if more)

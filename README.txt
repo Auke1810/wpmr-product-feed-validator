@@ -4,7 +4,7 @@ Tags: woocommerce, product feed, validation, google shopping
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 0.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,7 +48,21 @@ Yes, custom rules can be added via the Rules Manager interface or filters.
 
 == Changelog ==
 
-= 1.0.0 =
+= 0.2.0 - 2025-11-26 =
+* Added: Comprehensive frontend validation results display with detailed diagnostics
+* Added: XML declaration validation (version and encoding checks)
+* Added: File encoding validation with BOM detection
+* Added: XML structure validation (root element and namespace checks)
+* Added: Color-coded status banners (green/yellow/red) for validation results
+* Added: Statistics dashboard showing total products, errors, warnings, and valid products
+* Added: Grouped error and warning sections with "how to fix" guidance
+* Added: Improvement tips section with 5 optimization suggestions
+* Changed: Simplified export section to clear email CSV notice
+* Improved: User experience with actionable error messages and guidance
+* Improved: Performance with optimized rendering (82% code reduction in export section)
+* Fixed: Early detection of malformed feeds before expensive parsing
+
+= 0.1.0 - 2025-10-02 =
 * Initial release with core validation functionality
 * REST API endpoints for integration
 * Admin interface for rule management
@@ -56,13 +70,16 @@ Yes, custom rules can be added via the Rules Manager interface or filters.
 
 == Upgrade Notice ==
 
-= 1.0.0 =
+= 0.2.0 =
+Major feature update: Enhanced validation results display with detailed diagnostics, XML validation improvements, and better user guidance. Recommended for all users.
+
+= 0.1.0 =
 Initial release. No upgrade required.
 
 == Usage ==
 
 ### Shortcode
-`[wpmr_feed_validator]` - Displays the validation form in any post/page
+`[feed_validator]` - Displays the validation form in any post/page
 
 ### REST API Endpoints
 - `POST /wp-json/wpmr/v1/validate` - Validate single product
