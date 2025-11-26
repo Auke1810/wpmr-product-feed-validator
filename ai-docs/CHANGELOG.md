@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-11-26
+
+### Added
+#### GitHub Auto-Updates Implementation (2025-11-26)
+- **GitHub Auto-Updates**: WordPress now automatically detects and installs plugin updates from GitHub releases
+  - Added `Update URI` header to prevent WordPress.org update checks
+  - Created `GitHub_Updater` class (~300 lines) for automatic version checking
+  - Hooks into WordPress update system (`pre_set_site_transient_update_plugins`, `plugins_api`)
+  - Caches GitHub API responses for 12 hours to avoid rate limits
+  - Shows update notifications in standard WordPress admin UI
+  - One-click updates directly from WordPress plugins page
+  - Force update check feature for debugging (`?wpmr_pfv_force_update=1`)
+  - Debug logging support (when `WP_DEBUG_LOG` enabled)
+- **GitHub Actions Workflow**: Automated release creation
+  - Created `.github/workflows/release.yml` for automated releases
+  - Triggered on tag push (e.g., `v0.3.0`)
+  - Automatically creates clean ZIP file (excludes dev files via `.distignore`)
+  - Generates changelog from git commits
+  - Creates GitHub release with ZIP asset
+  - Fully automated release process
+- **Documentation**: Comprehensive auto-updates guide
+  - Created `ai-docs/GITHUB_AUTO_UPDATES_GUIDE.md` with complete documentation
+  - Release process documentation
+  - Troubleshooting guide
+  - FAQ section
+  - Technical implementation details
+
 ### Changed
 #### Export Results Section Simplification (2025-11-26)
 - **Simplified Export Section**: Replaced placeholder export buttons (PDF, CSV, JSON) with clear email notice

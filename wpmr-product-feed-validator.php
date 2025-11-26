@@ -2,12 +2,13 @@
 /**
  * Plugin Name:       WPMR Product Feed Validator
  * Description:       Validate Google Shopping product feeds and email/share reports.
- * Version:           0.2.0
+ * Version:           0.3.0
  * Author:            WP Marketing Robot
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       wpmr-product-feed-validator
  * Domain Path:       /languages
+ * Update URI:        https://github.com/Auke1810/wpmr-product-feed-validator
  */
 
 // Exit if accessed directly
@@ -17,7 +18,7 @@ if (!defined('ABSPATH')) {
 
 // Constants - must be defined before any other code
 if (!defined('WPMR_PFV_VERSION')) {
-    define('WPMR_PFV_VERSION', '0.2.0');
+    define('WPMR_PFV_VERSION', '0.3.0');
 }
 if (!defined('WPMR_PFV_PLUGIN_FILE')) {
     define('WPMR_PFV_PLUGIN_FILE', __FILE__);
@@ -91,6 +92,13 @@ require_once WPMR_PFV_PLUGIN_DIR . 'includes/Services/Rules.php';
 require_once WPMR_PFV_PLUGIN_DIR . 'includes/Services/RulesEngine.php';
 require_once WPMR_PFV_PLUGIN_DIR . 'includes/Services/Scoring.php';
 require_once WPMR_PFV_PLUGIN_DIR . 'includes/Services/Webhook.php';
+require_once WPMR_PFV_PLUGIN_DIR . 'includes/GitHub_Updater.php';
+
+// Initialize GitHub Auto-Updater
+new WPMR\PFV\GitHub_Updater(
+    WPMR_PFV_PLUGIN_FILE,
+    'Auke1810/wpmr-product-feed-validator'
+);
 
 // Init Admin
 add_action('admin_menu', ['WPMR\PFV\Admin\Settings', 'register_menu']);

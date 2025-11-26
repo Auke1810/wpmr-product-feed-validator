@@ -1,0 +1,73 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Plugin Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+      - name: Create plugin directory
+        run: mkdir -p build/wpmr-product-feed-validator
+      
+      - name: Copy plugin files (excluding .distignore items)
+        run: |
+          rsync -av \
+            --exclude-from='.distignore' \
+            --exclude='build' \
+            . build/wpmr-product-feed-validator/
+      
+      - name: Create plugin ZIP
+        run: |
+          cd build
+          zip -r wpmr-product-feed-validator-${{ steps.get_version.outputs.VERSION }}.zip wpmr-product-feed-validator/
+      
+      - name: Generate changelog from commits
+        id: changelog
+        run: |
+          # Get commits since last tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s" HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s" ${PREV_TAG}..HEAD)
+          fi
+          
+          # Save changelog to output
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Version ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## WPMR Product Feed Validator v${{ steps.get_version.outputs.VERSION }}
+            
+            ### Changes
+            ${{ steps.changelog.outputs.CHANGELOG }}
+            
+            ### Installation
+            1. Download the ZIP file below
+            2. Go to WordPress Admin → Plugins → Add New → Upload Plugin
+            3. Upload the ZIP file and activate
+            
+            ### Auto-Update
+            If you have version 0.3.0 or higher installed, WordPress will automatically detect this update and show an update notification in your admin panel.
+          files: build/wpmr-product-feed-validator-${{ steps.get_version.outputs.VERSION }}.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

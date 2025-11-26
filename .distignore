@@ -1,0 +1,66 @@
+# Directories
+.git
+.github
+node_modules
+vendor
+tests
+ai-docs
+
+# Git files
+.gitignore
+.gitattributes
+
+# Development files
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+
+# Build files
+composer.json
+composer.lock
+package.json
+package-lock.json
+phpunit.xml
+phpunit.xml.dist
+.phpcs.xml
+.phpcs.xml.dist
+
+# Documentation (keep README.txt for WordPress.org)
+README.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+
+# CI/CD
+.travis.yml
+.gitlab-ci.yml
+circle.yml
+.distignore
+
+# Logs
+*.log
+error_log
+debug.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.backup
+*~
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# IDE files
+.windsurf/
+.cascade/

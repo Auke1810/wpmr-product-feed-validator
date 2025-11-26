@@ -4,7 +4,7 @@ Tags: woocommerce, product feed, validation, google shopping
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,15 @@ Yes, custom rules can be added via the Rules Manager interface or filters.
 
 == Changelog ==
 
+= 0.3.0 - 2025-11-26 =
+* Added: GitHub auto-updates - WordPress now detects updates from GitHub releases
+* Added: Update URI header to prevent WordPress.org update checks
+* Added: GitHub_Updater class for automatic version checking
+* Added: GitHub Actions workflow for automated release creation
+* Added: One-click plugin updates directly from WordPress admin
+* Improved: Release process now fully automated via GitHub Actions
+* Improved: Users receive update notifications in standard WordPress UI
+
 = 0.2.0 - 2025-11-26 =
 * Added: Comprehensive frontend validation results display with detailed diagnostics
 * Added: XML declaration validation (version and encoding checks)
@@ -69,6 +78,9 @@ Yes, custom rules can be added via the Rules Manager interface or filters.
 * Support for Google Shopping Feed v2025-09
 
 == Upgrade Notice ==
+
+= 0.3.0 =
+Automatic updates from GitHub! WordPress will now automatically detect and install plugin updates. One-click updates directly from your admin panel. Recommended for all users.
 
 = 0.2.0 =
 Major feature update: Enhanced validation results display with detailed diagnostics, XML validation improvements, and better user guidance. Recommended for all users.
