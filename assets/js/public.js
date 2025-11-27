@@ -109,6 +109,20 @@
     var errors = Object.keys(errorGroups).map(function(code) { return errorGroups[code]; });
     var warnings = Object.keys(warningGroups).map(function(code) { return warningGroups[code]; });
 
+    // Calculate average quality score
+    var qualityScores = report.quality_scores || {};
+    var avgQualityScore = 0;
+    var qualityScoreCount = Object.keys(qualityScores).length;
+    if (qualityScoreCount > 0) {
+      var totalQuality = 0;
+      for (var key in qualityScores) {
+        if (qualityScores.hasOwnProperty(key)) {
+          totalQuality += qualityScores[key];
+        }
+      }
+      avgQualityScore = Math.round(totalQuality / qualityScoreCount);
+    }
+
     return {
       status: status,
       summary: summary,
@@ -119,6 +133,8 @@
       errors: errors,
       warnings: warnings,
       score: report.score,
+      quality_scores: qualityScores,
+      avg_quality_score: avgQualityScore,
       duplicates: report.duplicates || [],
       missing_id_count: report.missing_id_count || 0
     };
@@ -530,6 +546,9 @@
       .wpmr-pfv-status-message { flex: 1; font-size: 16px; font-weight: 500; }
       .wpmr-pfv-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
       .wpmr-pfv-stat-card { background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+      .wpmr-pfv-stat-card.quality { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; }
+      .wpmr-pfv-stat-card.quality .wpmr-pfv-stat-number { color: #fff; }
+      .wpmr-pfv-stat-card.quality .wpmr-pfv-stat-label { color: rgba(255,255,255,0.9); }
       .wpmr-pfv-stat-number { font-size: 32px; font-weight: bold; color: #2271b1; margin-bottom: 8px; }
       .wpmr-pfv-stat-label { font-size: 14px; color: #646970; }
       .wpmr-pfv-section { background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -621,15 +640,25 @@
     var grid = el('div', 'wpmr-pfv-stats-grid');
     
     var stats = [
-      { label: 'Total Products', value: data.total_products },
-      { label: 'Errors', value: data.error_count },
-      { label: 'Warnings', value: data.warning_count },
-      { label: 'Valid Products', value: data.valid_products }
+      { label: 'Total Products', value: data.total_products, class: '' },
+      { label: 'Errors', value: data.error_count, class: '' },
+      { label: 'Warnings', value: data.warning_count, class: '' },
+      { label: 'Valid Products', value: data.valid_products, class: '' }
     ];
     
+    // Add quality score card if available
+    if (data.avg_quality_score !== undefined && data.avg_quality_score !== null) {
+      stats.push({
+        label: 'Avg Quality Score',
+        value: data.avg_quality_score + '%',
+        class: 'quality'
+      });
+    }
+    
     stats.forEach(function(stat) {
-      var card = el('div', 'wpmr-pfv-stat-card');
-      var number = el('div', 'wpmr-pfv-stat-number', stat.value.toLocaleString());
+      var cardClass = 'wpmr-pfv-stat-card' + (stat.class ? ' ' + stat.class : '');
+      var card = el('div', cardClass);
+      var number = el('div', 'wpmr-pfv-stat-number', typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value);
       var label = el('div', 'wpmr-pfv-stat-label', stat.label);
       card.appendChild(number);
       card.appendChild(label);

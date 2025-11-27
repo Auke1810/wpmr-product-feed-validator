@@ -121,6 +121,9 @@ class Validate_Controller extends \WP_REST_Controller {
         $pack_eff = $pack; $pack_eff['weights'] = $eff_weights;
         $issues = \WPMR\PFV\Services\RulesEngine::evaluate( $items, $transport_diags, $pack_eff, $effective );
         $score_data = \WPMR\PFV\Services\Scoring::compute( $issues, $pack_eff );
+        
+        // Calculate quality scores for all products
+        $quality_scores = \WPMR\PFV\Services\RulesEngine::calculate_all_quality_scores( $issues, $items );
 
         // Build report payload (scoring will be added in Milestone 3)
         $report = [
@@ -138,6 +141,7 @@ class Validate_Controller extends \WP_REST_Controller {
             'issues'            => $issues,
             'score'             => $score_data['score'],
             'totals'            => $score_data['totals'],
+            'quality_scores'    => $quality_scores,
         ];
 
         $delivery_mode = $opts['delivery_mode'] ?? 'email_plus_display';

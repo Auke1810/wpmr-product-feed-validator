@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2025-11-27
+
+### Added
+#### Feed Quality Enhancements (2025-11-27)
+- **Availability Validation**: Now validates `g:availability` attribute against Google Shopping requirements
+  - Error if availability is missing
+  - Error if availability has invalid value (must be: in stock, out of stock, preorder, or backorder)
+  - Prevents feed rejections from invalid availability values
+- **Quality Score Calculation**: Automatic quality scoring for all products (0-100%)
+  - Weighted scoring: Errors (-10 points), Warnings (-5 points), Advice (-2 points)
+  - Displayed in statistics dashboard as "Avg Quality Score"
+  - Visual gradient card styling (purple gradient)
+  - Helps merchants prioritize which products need attention
+- **Title Minimum Length Check**: Added warning for titles < 30 characters
+  - Google recommends 30-150 characters for optimal performance
+  - Previously only checked maximum length (150 chars)
+  - Helps merchants optimize product titles
+- **Description Optimal Length Guidance**: Added advice for descriptions 100-159 characters
+  - Google recommends 160-500 characters for best performance
+  - Maintains existing error for descriptions < 100 characters
+  - Provides actionable guidance for improvement
+
+### Fixed
+#### identifier_exists Attribute Support (2025-11-27)
+- **Fixed**: Products with `g:identifier_exists="no"` no longer flagged as errors
+  - Parser now extracts `identifier_exists` attribute from feed
+  - Validation skips identifier error when `identifier_exists="no"` or `"false"`
+  - Shows advisory notice when `identifier_exists="no"` is used
+  - Complies with Google Shopping specifications for custom/handmade products
+- **Improved**: Better error message for missing identifiers
+  - Now suggests setting `identifier_exists="no"` if identifiers genuinely don't exist
+  - Clearer guidance for merchants
+
+### Technical
+- **Backend**: Added 3 new validation rules to `RulesEngine.php`
+- **Backend**: Added 2 new methods for quality score calculation
+- **Backend**: Updated `Validate_Controller.php` to include quality scores in API response
+- **Frontend**: Updated `public.js` to display quality scores in statistics dashboard
+- **Frontend**: Added CSS styling for quality score card with gradient background
+- **Performance**: Quality score calculation is O(n) per product, minimal performance impact
+
 ## [0.3.0] - 2025-11-26
 
 ### Added

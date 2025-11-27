@@ -48,6 +48,17 @@ Yes, custom rules can be added via the Rules Manager interface or filters.
 
 == Changelog ==
 
+= 0.3.1 - 2025-11-27 =
+* Added: Availability validation - validates g:availability against Google Shopping requirements
+* Added: Quality score calculation (0-100%) for all products with weighted scoring
+* Added: Quality score display in statistics dashboard with gradient styling
+* Added: Title minimum length check (warning if < 30 chars)
+* Added: Description optimal length guidance (advice if 100-159 chars)
+* Fixed: identifier_exists attribute now properly recognized and validated
+* Fixed: Products with identifier_exists="no" no longer flagged as errors
+* Improved: Better error messages for missing identifiers with actionable guidance
+* Performance: Minimal impact - quality score calculation is O(n) per product
+
 = 0.3.0 - 2025-11-26 =
 * Added: GitHub auto-updates - WordPress now detects updates from GitHub releases
 * Added: Update URI header to prevent WordPress.org update checks
@@ -78,6 +89,9 @@ Yes, custom rules can be added via the Rules Manager interface or filters.
 * Support for Google Shopping Feed v2025-09
 
 == Upgrade Notice ==
+
+= 0.3.1 =
+Feed quality enhancements! New quality scoring, availability validation, and better title/description guidance. identifier_exists attribute now properly supported. Recommended for all users.
 
 = 0.3.0 =
 Automatic updates from GitHub! WordPress will now automatically detect and install plugin updates. One-click updates directly from your admin panel. Recommended for all users.

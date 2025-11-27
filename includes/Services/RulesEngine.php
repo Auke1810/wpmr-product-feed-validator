@@ -119,23 +119,51 @@ class RulesEngine {
 
             // Text quality
             $title = (string) ( $it['title'] ?? '' );
+            if ( strlen( $title ) < 30 ) {
+                self::add_issue( $issues, 'warning', $item_id, 'title_too_short', 'text', 'Title too short (< 30 chars). Recommend 30-150 chars for better performance.' );
+            }
             if ( strlen( $title ) > 150 ) {
                 self::add_issue( $issues, $effective, $item_id, 'title_too_long', 'text', 'Title length > 150 chars' );
             }
             $desc = (string) ( $it['description'] ?? '' );
             if ( $desc !== '' && strlen( $desc ) < 100 ) {
                 self::add_issue( $issues, $effective, $item_id, 'description_too_short', 'text', 'Description too short (< 100 chars)' );
+            } elseif ( $desc !== '' && strlen( $desc ) >= 100 && strlen( $desc ) < 160 ) {
+                self::add_issue( $issues, 'advice', $item_id, 'description_suboptimal', 'text', 'Description could be longer (100-159 chars). Recommend 160-500 chars for better performance.' );
             }
 
             // Identifiers
             $gtin = trim( (string) ( $it['gtin'] ?? '' ) );
             $brand = trim( (string) ( $it['brand'] ?? '' ) );
             $mpn = trim( (string) ( $it['mpn'] ?? '' ) );
+            $identifier_exists = strtolower( trim( (string) ( $it['identifier_exists'] ?? '' ) ) );
+            
+            // Check if all identifiers are missing
             if ( $gtin === '' && $brand === '' && $mpn === '' ) {
-                self::add_issue( $issues, $effective, $item_id, 'identifiers_all_missing', 'identifiers', 'Missing all of: g:gtin, g:brand, g:mpn' );
+                // Only flag as error if identifier_exists is not set to 'no'
+                if ( $identifier_exists !== 'no' && $identifier_exists !== 'false' ) {
+                    self::add_issue( $issues, $effective, $item_id, 'identifiers_all_missing', 'identifiers', 'Missing all of: g:gtin, g:brand, g:mpn. Set g:identifier_exists=no if product has no identifiers.' );
+                }
             }
+            
+            // If identifier_exists is set to 'no', show advisory notice
+            if ( $identifier_exists === 'no' || $identifier_exists === 'false' ) {
+                self::add_issue( $issues, 'advice', $item_id, 'identifier_exists_no', 'identifiers', 'Using g:identifier_exists=no. This is legal but not recommended. Only use for custom/handmade products without standard identifiers.' );
+            }
+            
+            // Validate GTIN format if present
             if ( $gtin !== '' && ! preg_match( '/^\d{8,14}$/', $gtin ) ) {
                 self::add_issue( $issues, $effective, $item_id, 'gtin_invalid', 'identifiers', 'GTIN present but fails length/numeric check.' );
+            }
+
+            // Availability validation
+            $availability = strtolower( trim( (string) ( $it['availability'] ?? '' ) ) );
+            $valid_availability = ['in stock', 'out of stock', 'preorder', 'backorder', 'in_stock', 'out_of_stock'];
+            
+            if ( $availability === '' ) {
+                self::add_issue( $issues, 'error', $item_id, 'missing_availability', 'required', 'Missing g:availability' );
+            } elseif ( ! in_array( $availability, $valid_availability, true ) ) {
+                self::add_issue( $issues, 'error', $item_id, 'invalid_availability', 'required', 'Invalid availability value. Must be: in stock, out of stock, preorder, or backorder.' );
             }
 
             // Category & Product type
@@ -242,5 +270,59 @@ class RulesEngine {
         if ( $condition ) {
             self::add_issue( $issues, $effective, $item_id, $code, $fallback_category, $fallback_message );
         }
+    }
+
+    /**
+     * Calculate quality score for a product
+     *
+     * @param array  $issues All validation issues
+     * @param string $item_id Product ID to calculate score for
+     * @return int Quality score (0-100)
+     */
+    public static function calculate_quality_score( array $issues, string $item_id ): int {
+        // Filter issues for this specific item
+        $item_issues = array_filter( $issues, function( $issue ) use ( $item_id ) {
+            return isset( $issue['item_id'] ) && $issue['item_id'] === $item_id;
+        });
+        
+        // Count issues by severity
+        $error_count = count( array_filter( $item_issues, function( $i ) {
+            return isset( $i['severity'] ) && $i['severity'] === 'error';
+        }));
+        $warning_count = count( array_filter( $item_issues, function( $i ) {
+            return isset( $i['severity'] ) && $i['severity'] === 'warning';
+        }));
+        $advice_count = count( array_filter( $item_issues, function( $i ) {
+            return isset( $i['severity'] ) && $i['severity'] === 'advice';
+        }));
+        
+        // Weight errors more heavily than warnings and advice
+        // Errors: -10 points each
+        // Warnings: -5 points each
+        // Advice: -2 points each
+        $penalty = ( $error_count * 10 ) + ( $warning_count * 5 ) + ( $advice_count * 2 );
+        
+        // Calculate score (start at 100, subtract penalties)
+        $score = max( 0, min( 100, 100 - $penalty ) );
+        
+        return (int) round( $score );
+    }
+
+    /**
+     * Calculate quality scores for all products
+     *
+     * @param array $issues All validation issues
+     * @param array $items All product items
+     * @return array Quality scores keyed by item ID
+     */
+    public static function calculate_all_quality_scores( array $issues, array $items ): array {
+        $quality_scores = [];
+        
+        foreach ( $items as $it ) {
+            $item_id = (string) ( $it['id'] ?? 'unknown' );
+            $quality_scores[$item_id] = self::calculate_quality_score( $issues, $item_id );
+        }
+        
+        return $quality_scores;
     }
 }
