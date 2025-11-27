@@ -120,7 +120,7 @@ class RulesEngine {
             // Text quality
             $title = (string) ( $it['title'] ?? '' );
             if ( strlen( $title ) < 30 ) {
-                self::add_issue( $issues, 'warning', $item_id, 'title_too_short', 'text', 'Title too short (< 30 chars). Recommend 30-150 chars for better performance.' );
+                self::add_issue( $issues, $effective, $item_id, 'title_too_short', 'text', 'Title too short (< 30 chars). Recommend 30-150 chars for better performance.' );
             }
             if ( strlen( $title ) > 150 ) {
                 self::add_issue( $issues, $effective, $item_id, 'title_too_long', 'text', 'Title length > 150 chars' );
@@ -129,7 +129,7 @@ class RulesEngine {
             if ( $desc !== '' && strlen( $desc ) < 100 ) {
                 self::add_issue( $issues, $effective, $item_id, 'description_too_short', 'text', 'Description too short (< 100 chars)' );
             } elseif ( $desc !== '' && strlen( $desc ) >= 100 && strlen( $desc ) < 160 ) {
-                self::add_issue( $issues, 'advice', $item_id, 'description_suboptimal', 'text', 'Description could be longer (100-159 chars). Recommend 160-500 chars for better performance.' );
+                self::add_issue( $issues, $effective, $item_id, 'description_suboptimal', 'text', 'Description could be longer (100-159 chars). Recommend 160-500 chars for better performance.' );
             }
 
             // Identifiers
@@ -148,7 +148,7 @@ class RulesEngine {
             
             // If identifier_exists is set to 'no', show advisory notice
             if ( $identifier_exists === 'no' || $identifier_exists === 'false' ) {
-                self::add_issue( $issues, 'advice', $item_id, 'identifier_exists_no', 'identifiers', 'Using g:identifier_exists=no. This is legal but not recommended. Only use for custom/handmade products without standard identifiers.' );
+                self::add_issue( $issues, $effective, $item_id, 'identifier_exists_no', 'identifiers', 'Using g:identifier_exists=no. This is legal but not recommended. Only use for custom/handmade products without standard identifiers.' );
             }
             
             // Validate GTIN format if present
@@ -161,9 +161,9 @@ class RulesEngine {
             $valid_availability = ['in stock', 'out of stock', 'preorder', 'backorder', 'in_stock', 'out_of_stock'];
             
             if ( $availability === '' ) {
-                self::add_issue( $issues, 'error', $item_id, 'missing_availability', 'required', 'Missing g:availability' );
+                self::add_issue( $issues, $effective, $item_id, 'missing_availability', 'required', 'Missing g:availability' );
             } elseif ( ! in_array( $availability, $valid_availability, true ) ) {
-                self::add_issue( $issues, 'error', $item_id, 'invalid_availability', 'required', 'Invalid availability value. Must be: in stock, out of stock, preorder, or backorder.' );
+                self::add_issue( $issues, $effective, $item_id, 'invalid_availability', 'required', 'Invalid availability value. Must be: in stock, out of stock, preorder, or backorder.' );
             }
 
             // Category & Product type
