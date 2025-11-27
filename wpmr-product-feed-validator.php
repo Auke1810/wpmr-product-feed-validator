@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       WPMR Product Feed Validator
  * Description:       Validate Google Shopping product feeds and email/share reports.
- * Version:           0.3.0
+ * Version:           0.3.1
  * Author:            WP Marketing Robot
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 
 // Constants - must be defined before any other code
 if (!defined('WPMR_PFV_VERSION')) {
-    define('WPMR_PFV_VERSION', '0.3.0');
+    define('WPMR_PFV_VERSION', '0.3.1');
 }
 if (!defined('WPMR_PFV_PLUGIN_FILE')) {
     define('WPMR_PFV_PLUGIN_FILE', __FILE__);
